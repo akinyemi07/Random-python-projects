@@ -1,0 +1,29 @@
+/*****************************************************************************
+ * 	Name:Akinyemi Sodiq - The code enigma 
+ * 	project: Another weather App
+ * 	Date: may 3rd 2025
+ ***************************************************************************/
+body {
+    background: url('https://source.unsplash.com/1600x900/?nature,clouds') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.hero-section {
+    margin-top: 0;
+}
+
+.weather-section {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.nav-link {
+    margin: 0 10px;
+}
+
+#weatherResults {
+    margin-top: 20px;
+}
+
