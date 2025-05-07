@@ -1,0 +1,88 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+import requests
+import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
+
+
+class CurrencyExchangeApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Currency Exchange Dashboard")
+        self.root.geometry("400x300")
+        self.api_key = "https://api.exchangerate.host"
+
+        self.create_widgets()
+
+    def create_widgets(self):
+        ttk.Label(self.root, text="Base Currency:").pack(pady=5)
+        self.base_currency = ttk.Entry(self.root)
+        self.base_currency.pack()
+
+        ttk.Label(self.root, text="Target Currency:").pack(pady=5)
+        self.target_currency = ttk.Entry(self.root)
+        self.target_currency.pack()
+
+        ttk.Label(self.root, text="Amount:").pack(pady=5)
+        self.amount_entry = ttk.Entry(self.root)
+        self.amount_entry.pack()
+
+        ttk.Button(self.root, text="Convert", command=self.convert).pack(pady=10)
+        ttk.Button(self.root, text="Show Chart", command=self.plot_chart).pack()
+
+        self.result_label = ttk.Label(self.root, text="", font=("Arial", 12))
+        self.result_label.pack(pady=20)
+
+    def convert(self):
+        base = self.base_currency.get().upper()
+        target = self.target_currency.get().upper()
+        amount = self.amount_entry.get()
+
+        try:
+            float(amount)
+        except ValueError:
+            messagebox.showerror("Invalid Input", "Amount must be a number.")
+            return
+
+        url = f"{self.api_key}/convert?from={base}&to={target}&amount={amount}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            result = data['result']
+            self.result_label.config(text=f"{amount} {base} = {result:.2f} {target}")
+        else:
+            messagebox.showerror("Error", "Failed to fetch exchange rate.")
+
+    def plot_chart(self):
+        base = self.base_currency.get().upper()
+        target = self.target_currency.get().upper()
+        end_date = datetime.now().date()
+        start_date = end_date - timedelta(days=30)
+
+        url = f"{self.api_key}/timeseries?start_date={start_date}&end_date={end_date}&base={base}&symbols={target}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            rates = data['rates']
+
+            dates = sorted(rates.keys())
+            values = [rates[date][target] for date in dates]
+
+            plt.figure(figsize=(10, 5))
+            plt.plot(dates, values, marker='o')
+            plt.title(f"{base} to {target} - Last 30 Days")
+            plt.xlabel("Date")
+            plt.ylabel("Exchange Rate")
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            plt.grid()
+            plt.show()
+        else:
+            messagebox.showerror("Error", "Failed to load historical data.")
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = CurrencyExchangeApp(root)
+    root.mainloop()
+
